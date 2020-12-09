@@ -1,0 +1,10 @@
+---
+entry:
+  host: "localhost" # server address (domain name or IP address)
+  port: 80 # websocket listen port
+  path: "/iface/v1/cpe" # websocket entry path
+  enableSSL: false # true='wss' , false='ws'
+
+log:
+  folder: "/tmp"
+  rotateCount: 2
