@@ -4,6 +4,7 @@ entry:
   port: 80 # websocket listen port
   path: "/iface/v1/cpe" # websocket entry path
   enableSSL: false # true='wss' , false='ws'
+  pingPeriod: 30 # ping period
 
 log:
   folder: "/tmp"

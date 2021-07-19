@@ -70,7 +70,7 @@ func (clientSession *ClientSession) GetState() SessionState {
 }
 
 // Open ...
-func (clientSession *ClientSession) Open(host string, port int, path string, tlsConfig *tls.Config) error {
+func (clientSession *ClientSession) Open(host string, port int, path string, pingPeriod int, tlsConfig *tls.Config) error {
 	var err error
 
 	if StateClosed != clientSession.state {
@@ -113,7 +113,7 @@ func (clientSession *ClientSession) Open(host string, port int, path string, tls
 
 	// initialize ping mechanism
 	clientSession.ping.retry = false
-	clientSession.ping.timer = time.NewTimer(time.Duration(pingInterval) * time.Second)
+	clientSession.ping.timer = time.NewTimer(time.Duration(pingPeriod) * time.Second)
 	defer clientSession.ping.timer.Stop()
 	defer clientSession.connection.Close()
 	defer debug.FreeOSMemory()
@@ -142,14 +142,14 @@ func (clientSession *ClientSession) Open(host string, port int, path string, tls
 					logger.New().Debug("PING SUCCESS")
 
 					rSession.ping.retry = false
-					rTimer.Reset(time.Duration(pingInterval) * time.Second)
+					rTimer.Reset(time.Duration(pingPeriod) * time.Second)
 				},
 				func(session Session, datagramID string, condition packet.ErrorCondition, errorMessage string) {
 					logger.New().Debug("PING ERROR", zap.String("CONDITION", condition.String()), zap.String("MESSAGE", errorMessage))
 
 					if rSession.ping.retry == false {
 						rSession.ping.retry = true
-						rTimer.Reset(time.Duration(pingInterval) * time.Second)
+						rTimer.Reset(time.Duration(pingPeriod) * time.Second)
 					} else {
 						rSession.Close(websocket.CloseNormalClosure, "PING ERROR")
 					}
@@ -159,7 +159,7 @@ func (clientSession *ClientSession) Open(host string, port int, path string, tls
 
 					if rSession.ping.retry == false {
 						rSession.ping.retry = true
-						rTimer.Reset(time.Duration(pingInterval) * time.Second)
+						rTimer.Reset(time.Duration(pingPeriod) * time.Second)
 					} else {
 						rSession.Close(websocket.CloseNormalClosure, "PING TIMEOUT")
 					}
