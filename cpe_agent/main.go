@@ -130,11 +130,13 @@ func main() {
 	portValue := configger.GetValue("entry", "port")
 	pathValue := configger.GetValue("entry", "path")
 	enableSSLValue := configger.GetValue("entry", "enableSSL")
+	pingValue := configger.GetValue("entry", "pingPeriod")
 
 	host := hostValue.String("localhost")
 	port := portValue.Int(443)
 	path := pathValue.String("/iface/v1/cpe")
 	enableSSL := enableSSLValue.Bool(true)
+	ping := pingValue.Int(30)
 
 	var tlsConfig *tls.Config
 	if enableSSL == true {
@@ -175,12 +177,13 @@ func main() {
 					session = ws.NewClientSession(&CpeSessionHandler{})
 				}
 
-				logger.New().Info("websocket: CONNECTING TO HOST...", zap.String("host", host), zap.Int("port", port), zap.String("path", path), zap.Bool("enableSSL", enableSSL))
+				logger.New().Info("websocket: CONNECTING TO HOST...", zap.String("host", host), zap.Int("port", port), zap.String("path", path), zap.Bool("enableSSL", enableSSL), zap.Int("pingPeriod", ping))
 
 				err := session.Open(
 					host,
 					port,
 					path,
+					ping,
 					tlsConfig)
 
 				if nil != err {
